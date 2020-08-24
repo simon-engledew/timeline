@@ -42,14 +42,18 @@ export const getServerSideProps = async () => {
   };
 };
 
+function pad(o) {
+  return String(o).padStart(2, '0');
+}
+
 function today(now = new Date()) {
-  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+    now.getDate()
+  )}`;
 }
 
 function formatTime(time) {
-  return `${String(time.getHours()).padStart(2, '0')}:${String(
-    time.getMinutes()
-  ).padStart(2, '0')}`;
+  return `${pad(time.getHours())}:${pad(time.getMinutes())}`;
 }
 
 const splitLink = new RegExp(`(\\[[^\\]]+\\]\\([^\\)]+\\))`, 'g');
