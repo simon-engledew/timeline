@@ -1,5 +1,7 @@
 :root {
-  --primary: #f44336;
+  --primary: #375EC5;
+  --primary-text: #333;
+  --background: #f9f9fa;
 }
 * {
   box-sizing: border-box;
@@ -10,6 +12,7 @@ html {
   font-family: -apple-system, ".SFNSText-Regular", "San Francisco", "Roboto", "Segoe UI", "Helvetica Neue", "Lucida Grande", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  background-color: var(--background);
 }
 ul {
   list-style-type: none;

@@ -13,27 +13,25 @@ export const getServerSideProps = async () => {
   const readdir = util.promisify(fs.readdir);
   const readFile = util.promisify(fs.readFile);
 
-  const dates = (await readdir('../data')).sort();
+  const dates = (await readdir('../data')).sort().reverse().slice(0, 5);
 
-  const data = (
-    await Promise.all<{ date: string; lines: [string, string][] }>(
-      dates.map(async function (date) {
-        console.log(`../data/${date}`);
-        return {
-          date,
-          lines: (await readFile(`../data/${date}`, { encoding: 'utf-8' }))
-            .trim()
-            .split('\n')
-            .filter((item) => item.length > 0)
-            .reverse()
-            .map((line) => {
-              const offset = line.indexOf(' ');
-              return [line.slice(0, offset), line.slice(offset + 1)];
-            }),
-        };
-      })
-    )
-  ).reverse();
+  const data = await Promise.all<{ date: string; lines: [string, string][] }>(
+    dates.map(async function (date) {
+      console.log(`../data/${date}`);
+      return {
+        date,
+        lines: (await readFile(`../data/${date}`, { encoding: 'utf-8' }))
+          .trim()
+          .split('\n')
+          .filter((item) => item.length > 0)
+          .reverse()
+          .map((line) => {
+            const offset = line.indexOf(' ');
+            return [line.slice(0, offset), line.slice(offset + 1)];
+          }),
+      };
+    })
+  );
 
   return {
     props: {
@@ -53,7 +51,8 @@ function today(now = new Date()) {
 }
 
 function formatTime(time) {
-  return `${pad(time.getHours())}:${pad(time.getMinutes())}`;
+  const hours = time.getHours();
+  return `${hours % 12}:${pad(time.getMinutes())}${hours < 12 ? 'am' : 'pm'}`;
 }
 
 const splitLink = new RegExp(`(\\[[^\\]]+\\]\\([^\\)]+\\))`, 'g');
@@ -86,9 +85,6 @@ const Timeline: React.FunctionComponent<{
 
   return (
     <div>
-      <Head>
-        <title>Timeline</title>
-      </Head>
       <style jsx>{`
         header {
           display: inline-block;
@@ -96,6 +92,7 @@ const Timeline: React.FunctionComponent<{
           margin-left: 50vw;
           transform: translate(-50%, 0);
           border: solid 2px var(--primary);
+          box-shadow: 0 2px 8px 0 rgba(0, 0, 17, 0.1);
           font-size: 0;
         }
         header img {
@@ -103,6 +100,7 @@ const Timeline: React.FunctionComponent<{
           border-radius: 8px;
         }
         div {
+          color: var(--primary-text);
           background: linear-gradient(
             to bottom,
             var(--primary),
@@ -118,13 +116,15 @@ const Timeline: React.FunctionComponent<{
           position: relative;
         }
         ul:after {
+          background: #fff;
           content: '';
-          border-bottom: solid 2px var(--primary);
+          border: solid 2px var(--primary);
           position: absolute;
           bottom: 0;
-          transform: translate(-50%, 0);
+          border-radius: 50%;
+          transform: translate(-50%, 100%);
           width: 6px;
-          height: 0;
+          height: 6px;
         }
         li {
           width: 50vw;
@@ -136,6 +136,7 @@ const Timeline: React.FunctionComponent<{
         }
         article {
           border: solid 2px var(--primary);
+          box-shadow: 0 2px 8px 0 rgba(0, 0, 17, 0.1);
           border-radius: 5px;
           padding: 8px;
           position: relative;
@@ -153,13 +154,16 @@ const Timeline: React.FunctionComponent<{
           left: 100%;
         }
         time {
+          background: var(--primary);
+          color: #fff;
           position: absolute;
           bottom: 100%;
           right: 8px;
-          z-index: 1;
-          background: #fff;
+          font-size: 9pt;
+
           padding: 0 4px;
           border: solid 2px var(--primary);
+
           border-radius: 3px;
           transform: translate(0, 15%);
         }
@@ -197,9 +201,13 @@ const Index: React.FunctionComponent<InferGetStaticPropsType<
 
   return (
     <>
+      <Head>
+        <title>Timeline</title>
+      </Head>
       <style jsx>{`
         li {
           cursor: pointer;
+          color: var(--primary-text);
         }
         li.active {
           text-decoration: underline;
@@ -219,7 +227,7 @@ const Index: React.FunctionComponent<InferGetStaticPropsType<
         </ul>
       </header>
       <main>
-        <Timeline {...data[index]} />;
+        <Timeline {...data[index]} />
       </main>
     </>
   );
